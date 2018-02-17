@@ -29,19 +29,18 @@ import org.springframework.security.core.GrantedAuthority;
  */
 public class CanvasGrantedAuthority implements GrantedAuthority {
 
+    private static final long serialVersionUID = 1L;
+    private final String      authName;
 
-	private static final long serialVersionUID = 1L;
-	private final String authName;
-	
-	public CanvasGrantedAuthority(final Object name) {
-		this.authName = String.valueOf(name);
-	}
+    public CanvasGrantedAuthority(final Object name) {
+        this.authName = String.valueOf(name);
+    }
 
-	/**
-	 * @see org.springframework.security.core.GrantedAuthority#getAuthority()
-	 */
-	@Override
-	public String getAuthority() {
-		return this.authName;
-	}
+    /**
+     * @see org.springframework.security.core.GrantedAuthority#getAuthority()
+     */
+    @Override
+    public String getAuthority() {
+        return this.authName;
+    }
 }

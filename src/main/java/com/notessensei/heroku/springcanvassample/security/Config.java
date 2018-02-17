@@ -26,44 +26,60 @@ import java.util.UUID;
 
 /**
  * Configuration values we read from the environment
+ * 
  * @author swissel
  *
  */
 public enum Config {
 
     PARAMS;
-    
+
     // Values we get from the environment
-    private String secret = null;
-    private long expirationTime = 864000_000; // 10 days
-    
+    private final String secret;
+    private final String sfdcSecret;
+    private long         expirationTime = 864000_000; // 10 days
+
     private Config() {
         // Load from environment
-        this.secret = System.getenv("JWT_SECRET");
-        String timeCandidate = System.getenv("EXPIRATION_TIME");
+        this.secret = (System.getenv("JWT_SECRET") == null)
+                ? UUID.randomUUID().toString() + UUID.randomUUID().toString()
+                : System.getenv("JWT_SECRET");
+        this.sfdcSecret = (System.getenv("SDFC_SECRET") == null)
+                ? UUID.randomUUID().toString() + UUID.randomUUID().toString()
+                : System.getenv("SDFC_SECRET");
+        final String timeCandidate = System.getenv("EXPIRATION_TIME");
         if (timeCandidate != null) {
             try {
                 this.expirationTime = Long.parseLong(timeCandidate);
-            } catch (NumberFormatException nfe) {
+            } catch (final NumberFormatException nfe) {
                 nfe.printStackTrace();
             }
-        }
-        // Catch missing values
-        if (this.secret == null) {
-            this.secret = UUID.randomUUID().toString() + UUID.randomUUID().toString();
-        }
-        if (this.expirationTime == 0) {
+        } else {
             this.expirationTime = 3600_000L; // 1 hour
         }
-        
+
+    }
+
+    public int getCookieLifespan() {
+        int result = 3600; // 1h
+        try {
+            result = Math.toIntExact(this.expirationTime / 1000);
+        } catch (final Exception e) {
+            // No handling, it will default to 1h
+        }
+        return result;
+    }
+
+    public Date getExpirationTime() {
+        return new Date(System.currentTimeMillis() + this.expirationTime);
     }
 
     public byte[] getSecret() {
         return this.secret.getBytes();
     }
 
-    public Date getExpirationTime() {
-        return new Date(System.currentTimeMillis() + this.expirationTime);
+    public String getSfdcSecret() {
+        return this.sfdcSecret;
     }
-    
+
 }

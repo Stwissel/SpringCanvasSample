@@ -26,16 +26,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 
+ *
  * The unavoidable HelloWorld example
+ * 
  * @author swissel
  *
  */
 @RestController
 public class HelloWorld {
 
-	@RequestMapping(value = "/hw", method = RequestMethod.GET)
-	public String index() {
-		return "Hello World";
-	}
+    @RequestMapping(value = "/hw", method = RequestMethod.GET)
+    public String index() {
+        return "Hello World";
+    }
 }

@@ -34,7 +34,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/", "/sfdcauth", "/home", "/images/**", "/css/**", "/fonts/**", "/icons/**").permitAll()
+                .antMatchers("/", "/sfdcauth/**", "/home", "/images/**", "/css/**", "/fonts/**", "/icons/**")
+                .permitAll()
                 .anyRequest().authenticated()
                 .and()
                 // .addFilter(new CanvasAuthenticationFilter())
@@ -43,10 +44,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .csrf()
-                .ignoringAntMatchers("/sfdcauth")
-        /*
-         * .and() .formLogin() .loginPage("/login") .permitAll() .and()
-         * .logout() .permitAll()
-         */;
+                .ignoringAntMatchers("/sfdcauth/**");
     }
 }

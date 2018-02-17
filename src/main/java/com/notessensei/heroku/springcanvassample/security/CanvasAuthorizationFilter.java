@@ -65,7 +65,7 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
         final String jwtCookie = this.getJwtCookie(request);
 
         // Check if we have a JWT we can process
-        if (jwtCookie != null) {
+        if ((jwtCookie != null) && !"null".equals(jwtCookie)) {
             final Authentication authentication = this.extractAuthentication(jwtCookie);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
@@ -97,7 +97,13 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
                 if (entry.getKey().equals(SecurityConstants.USER_NAME_CLAIM)) {
                     user = String.valueOf(entry.getValue());
                 } else {
-                    roles.add(new CanvasGrantedAuthority(entry.getValue()));
+                    final String roleCandidate = String.valueOf(entry.getValue());
+                    if (roleCandidate.startsWith(SecurityConstants.ROLE_PREFIX)) {
+                        roles.add(new CanvasGrantedAuthority(
+                                roleCandidate.substring(SecurityConstants.ROLE_PREFIX.length())));
+                    } else {
+                        // TODO: other claims here?
+                    }
                 }
             }
 
@@ -106,7 +112,6 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
             }
 
         } catch (final Exception e) {
-            //TODO: fail bofy
             e.printStackTrace();
         }
         return result;
@@ -131,6 +136,13 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
                 }
             }
         }
+
+        // On first redirect the cookie value is transported in the attribute
+        if (result == null) {
+            result = String.valueOf(request.getSession().getAttribute(SecurityConstants.COOKIE_ATTRIBUTE));
+        }
+
         return result;
+
     }
 }

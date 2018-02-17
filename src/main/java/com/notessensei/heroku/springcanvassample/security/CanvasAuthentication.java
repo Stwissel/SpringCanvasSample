@@ -23,15 +23,23 @@ package com.notessensei.heroku.springcanvassample.security;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.UUID;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import canvas.SignedRequest;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -44,110 +52,172 @@ import io.jsonwebtoken.SignatureAlgorithm;
  */
 public class CanvasAuthentication implements Authentication {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	// TODO: Replace Object with the real thing
-	public static CanvasAuthentication create(final Object sfdcCanvas) throws Exception {
-		if (sfdcCanvas == null) {
-			throw new Exception("Canvas request is missing");
-		}
-		return new CanvasAuthentication();
-	}
+    public static CanvasAuthentication create(final String signedRequest) throws Exception {
+        if (signedRequest == null) {
+            throw new SecurityException("Canvas request is missing");
+        }
 
-	private String name;
+        // Get the request as JsonNode or throw an exception
+        final JsonNode json = SignedRequest.verifyAndDecodeAsJson(signedRequest, Config.PARAMS.getSfdcSecret());
+        final CanvasAuthentication result = new CanvasAuthentication(json);
 
-	private final Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-	private boolean isAuthenticated;
+        return result;
+    }
 
-	// TODO: remove this
-	public CanvasAuthentication() {
-		this.name = "Peter Pan";
-		this.grantedAuthorities.add(new CanvasGrantedAuthority("ADMIN"));
-		this.grantedAuthorities.add(new CanvasGrantedAuthority("USER"));
-		this.isAuthenticated = true;
-	}
+    private final JsonNode                     sfdcRequest;
+    private final String                       name;
+    private final Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
 
-	/**
-	 * @see org.springframework.security.core.Authentication#getAuthorities()
-	 */
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return this.grantedAuthorities;
-	}
+    private boolean isAuthenticated;
 
-	/**
-	 * @see org.springframework.security.core.Authentication#getCredentials()
-	 */
-	@Override
-	public Object getCredentials() {
-	    //FIXME: proper Value here
-		return "SFDCRequest";
-	}
+    public CanvasAuthentication(final JsonNode theRequest) {
+        this.sfdcRequest = theRequest;
+        this.name = this.getRequestParam("context/user/userName", "Anonymous");
+        this.isAuthenticated = !"Anonymous".equalsIgnoreCase(this.name);
+        // A user is always a user
+        this.grantedAuthorities.add(new CanvasGrantedAuthority("USER"));
+    }
 
-	/**
-	 * @see org.springframework.security.core.Authentication#getDetails()
-	 */
-	@Override
-	public Object getDetails() {
-		return null;
-	}
+    public CanvasAuthentication addAuthority(final String authorityName) {
+        this.grantedAuthorities.add(new CanvasGrantedAuthority(authorityName));
+        return this;
+    }
 
-	/**
-	 * @see java.security.Principal#getName()
-	 */
-	@Override
-	public String getName() {
-		return this.name;
-	}
-
-	/**
-	 * @see org.springframework.security.core.Authentication#getPrincipal()
-	 */
-	@Override
-	public User getPrincipal() {
-		User result = new User(this.getName(), UUID.randomUUID().toString(), this.getAuthorities());
-		return result;
-	}
-
-	/**
-	 * @see org.springframework.security.core.Authentication#isAuthenticated()
-	 */
-	@Override
-	public boolean isAuthenticated() {
-		return this.isAuthenticated;
-	}
-
-	/**
-	 * @see org.springframework.security.core.Authentication#setAuthenticated(boolean)
-	 */
-	@Override
-	public void setAuthenticated(final boolean isAuthenticated) throws IllegalArgumentException {
-		this.isAuthenticated = isAuthenticated;
-
-	}
-	
-	/**
-	 * Adds a JWT Header and cookie to the servlet response
-	 * @param response the Response to be sent back
-	 */
-	public void addJwtToResponse(final HttpServletResponse response) {
-	    final Claims authMap = Jwts.claims();
+    /**
+     * Adds a JWT Header and cookie to the servlet response
+     *
+     * @param response
+     *            the Response to be sent back
+     */
+    public void addJwtToResponse(final HttpSession session, final HttpServletRequest request,
+            final HttpServletResponse response) {
+        final Claims claims = Jwts.claims();
         this.getAuthorities().forEach(auth -> {
-            authMap.put(auth.getAuthority(), auth.getAuthority());
+            claims.put(SecurityConstants.ROLE_PREFIX + auth.getAuthority(), auth.getAuthority());
         });
         // Finally capture user name
-        authMap.put(SecurityConstants.USER_NAME_CLAIM,((User) this.getPrincipal()).getUsername());
-
+        claims.put(SecurityConstants.USER_NAME_CLAIM, this.getPrincipal().getUsername());
+        final Date expDate = Config.PARAMS.getExpirationTime();
         final String token = Jwts.builder()
-                .setClaims(authMap).setExpiration(Config.PARAMS.getExpirationTime())
+                .setClaims(claims)
+                .setExpiration(expDate)
                 .signWith(SignatureAlgorithm.HS512, Config.PARAMS.getSecret()).compact();
 
         // For standard web navigation
-        Cookie jwtCookie = new Cookie(SecurityConstants.COOKIE_NAME, token);
-        // FIXME: Uncomment next line for production
-        // jwtCookie.setSecure(true);
+        final Cookie jwtCookie = new Cookie(SecurityConstants.COOKIE_NAME, token);
+        // Limit cookies lifetime
+        jwtCookie.setMaxAge(Config.PARAMS.getCookieLifespan());
+        // In production only secure
+        final String srv = request.getServerName().toLowerCase();
+        if (!"localhost".equals(srv) && !"127.0.0.1".equals(srv) && !"::1".equals(srv)) {
+            jwtCookie.setSecure(true);
+        }
         jwtCookie.setHttpOnly(true);
         response.addCookie(jwtCookie);
-	}
+        // For first call redirection we need to transport the cookie as
+        // attribute
+        session.setAttribute(SecurityConstants.COOKIE_ATTRIBUTE, token);
+    }
+
+    /**
+     * @see org.springframework.security.core.Authentication#getAuthorities()
+     */
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.grantedAuthorities;
+    }
+
+    /**
+     * @see org.springframework.security.core.Authentication#getCredentials()
+     */
+    @Override
+    public Object getCredentials() {
+        return this.getDetails();
+    }
+
+    /**
+     * @see org.springframework.security.core.Authentication#getDetails()
+     */
+    @Override
+    public Object getDetails() {
+        final ObjectMapper om = new ObjectMapper();
+        String json = null;
+        try {
+            json = om.writeValueAsString(this.sfdcRequest);
+        } catch (final JsonProcessingException e) {
+            e.printStackTrace();
+            json = String.valueOf(this.sfdcRequest);
+        }
+        return json;
+    }
+
+    /**
+     * @see java.security.Principal#getName()
+     */
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    /**
+     * @see org.springframework.security.core.Authentication#getPrincipal()
+     */
+    @Override
+    public User getPrincipal() {
+        final User result = new User(this.getName(), UUID.randomUUID().toString(), this.getAuthorities());
+        return result;
+    }
+
+    public String getRequestParam(final String request) {
+        return this.getRequestParam(request, null);
+    }
+
+    /**
+     * Fetches a value from the JSON path specified with slashes
+     *
+     * @param request
+     *            the path requested e.g. context/user/userName
+     * @param defaultValue
+     * @return
+     */
+    public String getRequestParam(final String request, final String defaultValue) {
+        final String[] paraChain = request.split("/");
+        JsonNode curNode = this.sfdcRequest;
+        // When chain starts with a slash, ignore the first segment
+        for (int i = (paraChain[0] == "" ? 1 : 0); i < paraChain.length; i++) {
+            curNode = curNode.get(paraChain[i]);
+            if (curNode == null) {
+                break;
+            }
+        }
+        final String result = (curNode == null) ? defaultValue : curNode.asText();
+        return result;
+    }
+
+    /**
+     * @return the sfdcRequest
+     */
+    public final JsonNode getSfdcRequest() {
+        return this.sfdcRequest;
+    }
+
+    /**
+     * @see org.springframework.security.core.Authentication#isAuthenticated()
+     */
+    @Override
+    public boolean isAuthenticated() {
+        return this.isAuthenticated;
+    }
+
+    /**
+     * @see org.springframework.security.core.Authentication#setAuthenticated(boolean)
+     */
+    @Override
+    public void setAuthenticated(final boolean isAuthenticated) throws IllegalArgumentException {
+        this.isAuthenticated = isAuthenticated;
+
+    }
 
 }

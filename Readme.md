@@ -12,7 +12,10 @@ As added challenge: The application will require standard link and form based na
 
 ### Environment variables to be set
 
-- `JWT_SECRET` - the token used to encrypt the JWT. Ideally randomized on each restart, but needs to be the same in a dyno group
+- `JWT_SECRET` - the token used to encrypt the JWT. Ideally randomized on each restart, but needs to be the same in a dyno 
+- `SFDC_SECRET` - The client token shared with the Canvas definition in Salesforce
+
+
 
 ### Resources
 

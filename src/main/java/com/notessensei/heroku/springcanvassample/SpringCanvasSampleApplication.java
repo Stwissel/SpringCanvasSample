@@ -25,10 +25,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-/* Important: Don't add @EnableWebMvc here, screws things up. Badly!*/
+/* Important: Don't add @EnableWebMvc here, screws things up. Badly! */
 public class SpringCanvasSampleApplication {
 
-	public static void main(final String[] args) {
-		SpringApplication.run(SpringCanvasSampleApplication.class, args);
-	}
+    public static void main(final String[] args) {
+        SpringApplication.run(SpringCanvasSampleApplication.class, args);
+    }
 }
