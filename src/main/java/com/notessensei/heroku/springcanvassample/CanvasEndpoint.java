@@ -29,6 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -45,12 +46,19 @@ import com.notessensei.heroku.springcanvassample.security.CanvasAuthentication;
 public class CanvasEndpoint {
 
     @RequestMapping(value = "/sfdcauth", method = RequestMethod.POST)
-    public ResponseEntity<String> canvasPost(final HttpSession session, final HttpServletRequest request,
+    public ResponseEntity<String> canvasDefaultPost(final String endPoint, final HttpSession session,
+            final HttpServletRequest request,
+            final HttpServletResponse response) {
+        return this.canvasPost(null, session, request, response);
+    }
+
+    @RequestMapping(value = "/sfdcauth/{endpoint}", method = RequestMethod.POST)
+    public ResponseEntity<String> canvasPost(@PathVariable(name = "endpoint", required = false) final String endPoint,
+            final HttpSession session, final HttpServletRequest request,
             final HttpServletResponse response) {
 
         final String signedRequest = request.getParameter("signed_request");
-        final String redirectToCandidate = request.getParameter("redirect");
-        final String redirectTo = (redirectToCandidate == null) ? "/" : redirectToCandidate;
+        final String redirectTo = (endPoint == null) ? "/" : "/" + endPoint;
 
         if (signedRequest == null) {
             return new ResponseEntity<>("signed_request missing", HttpStatus.BAD_REQUEST);
@@ -60,8 +68,8 @@ public class CanvasEndpoint {
             final CanvasAuthentication auth = CanvasAuthentication.create(signedRequest);
             if ((auth != null) && auth.isAuthenticated()) {
                 // The canvas request was valid, we add Header and Token
-                auth.addJwtToResponse(response);
-                HttpHeaders headers = new HttpHeaders();
+                auth.addJwtToResponse(session, request, response);
+                final HttpHeaders headers = new HttpHeaders();
                 headers.add("Location", redirectTo);
                 return new ResponseEntity<>("Loading...", headers, HttpStatus.FOUND);
             }
