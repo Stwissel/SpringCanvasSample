@@ -95,10 +95,9 @@ public class CanvasEndpoint {
        result.append("<head>\n");
        result.append("<title>Spring and Canvas</title>\n");
        result.append("<body>\n");
-       result.append("<a href=\""+redirectTo+"\">{{Location}}</a>\n");
+       result.append("<a href=\""+redirectTo+"\">"+redirectTo+"</a>\n");
        result.append("<script type=\"text/javaScript\">\n");
        result.append("alert(\""+redirectTo+"\");\n");
-       result.append("window.location.url='"+redirectTo+"';");
        result.append("</script>\n");
        result.append("</body>\n");
        result.append("</html>");

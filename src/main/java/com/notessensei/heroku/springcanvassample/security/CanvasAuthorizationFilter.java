@@ -138,6 +138,7 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
         Object o = request.getSession().getAttribute(SecurityConstants.COOKIE_ATTRIBUTE);
         if (o != null) {
             result = String.valueOf(o);
+            System.out.println("Session JWT found");
         } else {
             final Cookie[] cookies = request.getCookies();
             if (cookies != null) {
@@ -151,7 +152,8 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
             }
         }
         if (resultCandidate != null) {
-            result = new String(new Base64().decode(resultCandidate.getBytes()));
+           // result = new String(new Base64().decode(resultCandidate.getBytes()));
+           result = resultCandidate; 
         }
 
         return result;
