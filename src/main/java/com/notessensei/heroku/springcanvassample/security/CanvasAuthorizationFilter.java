@@ -100,7 +100,7 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
                     final String roleCandidate = String.valueOf(entry.getValue());
                     if (roleCandidate.startsWith(SecurityConstants.ROLE_PREFIX)) {
                         roles.add(new CanvasGrantedAuthority(
-                                roleCandidate.substring(SecurityConstants.ROLE_PREFIX.length())));
+                                roleCandidate /*.substring(SecurityConstants.ROLE_PREFIX.length())*/ ));
                     } else {
                         // TODO: other claims here?
                     }

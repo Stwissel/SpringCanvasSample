@@ -19,36 +19,23 @@
  *                                                                            *
  * ========================================================================== *
  */
-package com.notessensei.heroku.springcanvassample.security;
+package com.notessensei.heroku.springcanvassample;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-@Configuration
-@EnableWebSecurity
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Override
-    protected void configure(final HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
-                .antMatchers("/",
-                        "/favicon.ico",
-                        "/error",
-                        "/sfdcauth/**",
-                        "/login",
-                        "/password",
-                        "/images/**",
-                        "/css/**",
-                        "/fonts/**",
-                        "/icons/**"
-                        )
-                .permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .addFilter(new CanvasAuthorizationFilter(this.authenticationManager()))
-                .csrf()
-                .ignoringAntMatchers("/sfdcauth/**");
+/**
+ * @author swissel
+ *
+ */
+@RestController
+public class PasswordGenerator {
+
+    @GetMapping(path="/password")
+    public String getAPassword(@RequestParam(name="password") final String password) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        return encoder.encode(password);
     }
 }

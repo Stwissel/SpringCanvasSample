@@ -11,21 +11,23 @@
 	href="/css/salesforce-lightning-design-system.min.css" />
 </head>
 <body>
-{{#param.logout}}
-	<div class="slds-notify  slds-notify_alert  slds-theme_warning"><span class="slds-icon_container slds-m-right_x-small"><svg class="slds-icon slds-icon_x-small"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="assets/@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg#change_owner"></use></svg></span>
-    <h2
-        class="">Bye Bye</h2>
-</div>
-{{/param.logout}}
-{{#param.error}}
+	{{#param.logout}}
+	<div class="slds-notify  slds-notify_alert  slds-theme_warning">
+		<span class="slds-icon_container slds-m-right_x-small"><svg
+				class="slds-icon slds-icon_x-small">
+				<use xmlns:xlink="http://www.w3.org/1999/xlink"
+					xlink:href="/icons/action-sprite/svg/symbols.svg#logout"></use></svg></span>
+		<h2 class="">Bye Bye</h2>
+	</div>
+	{{/param.logout}} {{#param.error}}
 	<div class="slds-notify  slds-notify_alert  slds-theme_error">
 		<span class="slds-icon_container slds-m-right_x-small"><svg
 				class="slds-icon slds-icon_x-small">
 				<use xmlns:xlink="http://www.w3.org/1999/xlink"
-					xlink:href="/icons/action-sprite/svg/symbols.svg#change_owner"></use></svg></span>
+					xlink:href="/icons/action-sprite/svg/symbols.svg#error"></use></svg></span>
 		<h2>Sorry pal, not you!</h2>
 	</div>
-{{/param.error}}
+	{{/param.error}}
 	<div
 		class="slds-card slds-m-around_medium slds-m-top_medium slds-m-right_medium slds-m-bottom_medium slds-m-left_medium slds-p-around_medium slds-p-top_medium slds-p-right_medium slds-p-bottom_medium slds-p-left_medium slds-card_boundary">
 		<div class="slds-card__header slds-grid">
@@ -34,7 +36,7 @@
 					<span class="slds-icon_container slds-icon-action-announcement"><svg
 							class="slds-icon">
 							<use xmlns:xlink="http://www.w3.org/1999/xlink"
-								xlink:href="/icons/action-sprite/svg/symbols.svg#announcement"></use></svg></span>
+								xlink:href="/icons/action-sprite/svg/symbols.svg#password_unlock"></use></svg></span>
 				</div>
 				<div class="slds-media__body">
 					<h2>
@@ -65,24 +67,27 @@
 				<div class="slds-card__body slds-card__body_inner">
 					<form method="post">
 
-                        <div class="slds-form_stacked">
+						<div class="slds-form_stacked">
 
-                            <div class="slds-form-element ">
-                                <label class="slds-form-element__label">User Name</label>
-                                <div class="slds-form-element__control">
-                                    <input class="slds-input" type="text" name="username" />
-                                </div>
-                            </div>
+							<div class="slds-form-element ">
+								<label class="slds-form-element__label">User Name</label>
+								<div class="slds-form-element__control">
+									<input class="slds-input" type="text" name="username" />
+								</div>
+							</div>
 
-                            <div class="slds-form-element ">
-                                <label class="slds-form-element__label">Password</label>
-                                <div class="slds-form-element__control">
-                                    <input class="slds-input" type="password" name="password" />
-                                </div>
-                            </div>
-                        </div>
-                        <input type="submit" class="slds-button slds-m-top_small slds-button_brand" value="login" />
-                    </form>
+							<div class="slds-form-element ">
+								<label class="slds-form-element__label">Password</label>
+								<div class="slds-form-element__control">
+									<input class="slds-input" type="password" name="password" />
+								</div>
+							</div>
+						</div>
+						<input type="hidden" name="_csrf" value="{{_csrf.token}}" />
+						<input type="submit"
+							class="slds-button slds-m-top_small slds-button_brand"
+							value="login" />
+					</form>
 				</div>
 			</div>
 

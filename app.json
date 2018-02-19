@@ -15,7 +15,15 @@
         "SFDC_SECRET" : {
             "description" : "The client token shared with the Canvas definition in Salesforce",
             "value" : "change me!"
-       }     
+       },
+        "ADMIN_NAME" : {
+            "description" : "admin user for /login page",
+            "value" : "admin"
+       },
+        "ADMIN_PASSWORD" : {
+            "description" : "bcrypt encoded password. Generate with /password/password=[yourpassword]",
+            "generator" : "secret"
+       }
     },
     "success_url" : "/"
 }

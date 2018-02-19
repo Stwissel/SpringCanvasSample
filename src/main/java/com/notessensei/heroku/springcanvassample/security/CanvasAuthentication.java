@@ -67,18 +67,35 @@ public class CanvasAuthentication implements Authentication {
         return result;
     }
 
+    public static CanvasAuthentication createAdminAccess(final String userName, final String password) {
+        if (!Config.PARAMS.adminIsValid(userName,password) ) {
+        throw new SecurityException("Username or password missing");
+    }
+        return new CanvasAuthentication(userName);
+    }
+
     private final JsonNode                     sfdcRequest;
     private final String                       name;
     private final Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
 
     private boolean isAuthenticated;
 
-    public CanvasAuthentication(final JsonNode theRequest) {
+    private CanvasAuthentication(final JsonNode theRequest) {
         this.sfdcRequest = theRequest;
         this.name = this.getRequestParam("context/user/userName", "Anonymous");
         this.isAuthenticated = !"Anonymous".equalsIgnoreCase(this.name);
         // A user is always a user
-        this.grantedAuthorities.add(new CanvasGrantedAuthority("USER"));
+        this.grantedAuthorities.add(new CanvasGrantedAuthority("ROLE_USER"));
+    }
+
+    private CanvasAuthentication(final String userName) {
+        this.sfdcRequest = new ObjectMapper().createObjectNode();
+        this.name = userName;
+        this.isAuthenticated = true;
+        // Admin hase more roles
+        this.grantedAuthorities.add(new CanvasGrantedAuthority("ROLE_USER"));
+        this.grantedAuthorities.add(new CanvasGrantedAuthority("ROLE_ADMIN"));
+        this.grantedAuthorities.add(new CanvasGrantedAuthority("ROLE_ACTUATOR"));
     }
 
     public CanvasAuthentication addAuthority(final String authorityName) {
@@ -111,8 +128,7 @@ public class CanvasAuthentication implements Authentication {
         // Limit cookies lifetime
         jwtCookie.setMaxAge(Config.PARAMS.getCookieLifespan());
         // In production only secure
-        final String srv = request.getServerName().toLowerCase();
-        if (!"localhost".equals(srv) && !"127.0.0.1".equals(srv) && !"::1".equals(srv)) {
+        if (!Config.PARAMS.runsOnLocalHost(request)) {
             jwtCookie.setSecure(true);
         }
         jwtCookie.setHttpOnly(true);

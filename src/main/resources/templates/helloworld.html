@@ -18,7 +18,7 @@
 					<span class="slds-icon_container slds-icon-action-announcement"><svg
 							class="slds-icon">
 							<use xmlns:xlink="http://www.w3.org/1999/xlink"
-								xlink:href="assets/@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg#announcement"></use></svg></span>
+								xlink:href="/icons/action-sprite/svg/symbols.svg#announcement"></use></svg></span>
 				</div>
 				<div class="slds-media__body">
 					<h2>
@@ -38,6 +38,11 @@
 			<p>
 			Or more likely: Hello {{username}}
 			</p>
+			<ul>
+			{{#adminList}}
+			     <li><a href="{{.}}">{{.}}</a></li>
+			{{/adminList}}
+			</ul>
 		</div>
 	</div>
 

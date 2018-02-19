@@ -26,6 +26,8 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 /**
  * Configuration values we read from the environment
  * 
@@ -93,12 +95,33 @@ public enum Config {
      * @return true if insecure is acceptable
      */
     public boolean allowInsecureDebugOperation(HttpServletRequest request) {
-        final String srv = request.getServerName().toLowerCase();
-        if ("localhost".equals(srv) || "127.0.0.1".equals(srv) || "::1".equals(srv)) {
+        if (this.runsOnLocalHost(request)) {
             String insecure = System.getenv("INSECURE_DEBUG");
             return  insecure != null && "true".equalsIgnoreCase(insecure); 
         }
         return false;
+    }
+
+    /**
+     *
+     * @param userName User Name in clear text
+     * @param password password encoded with bCrypy
+     * @return true for a match
+     */
+    public boolean adminIsValid(String userName, String password) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String usr = System.getenv("ADMIN_NAME");
+        String pwd = System.getenv("ADMIN_PASSWORD");
+        return (userName.equals(usr) && encoder.matches(password, pwd));
+    }
+
+    public boolean runsOnLocalHost(HttpServletRequest request) {
+        final String srv = request.getServerName().toLowerCase();
+        return ("localhost".equals(srv) || "127.0.0.1".equals(srv) || "::1".equals(srv));
+    }
+
+    public String getAdminUserName() {
+        return String.valueOf(System.getenv("ADMIN_NAME"));
     }
 
 }
