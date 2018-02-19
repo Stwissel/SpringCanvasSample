@@ -33,6 +33,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -124,17 +125,22 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
      *            HTTP Request
      * @return a cookie or null
      */
-    private String getJwtCookie(final HttpServletRequest request) {
+    private String getJwtCookie(final HttpServletRequest request) { 
         String result = null;
+        String resultCandidate = null;
+          
         final Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (int i = 0; i < cookies.length; i++) {
                 final Cookie currentCookie = cookies[i];
                 if (currentCookie.getName().equals(SecurityConstants.COOKIE_NAME)) {
-                    result = currentCookie.getValue();
+                    resultCandidate = currentCookie.getValue();
                     break;
                 }
             }
+        }
+        if (resultCandidate != null) {
+            result = new String(new Base64().decode(resultCandidate.getBytes()));
         }
 
         // On first redirect the cookie value is transported in the attribute
