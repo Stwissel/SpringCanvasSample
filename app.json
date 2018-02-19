@@ -1,0 +1,21 @@
+{
+    "name" : "Spring Boot Sample Application for Salesforce CANVAS integration",
+    "repository" : "https://github.com/Stwissel/SpringCanvasSample",
+    "logo" : "https://spring.io/img/homepage/icon-spring-framework.svg",
+    "keywords" : ["spring", "springboot", "salesforce", "canvas"],
+    "website" : "https://stwissel.github.io/springcanvassample",
+    "buildpacks" : [
+        {"url" : "heroku/java"}
+    ],
+    "env" : {
+        "JWT_SECRET" : {    
+            "description" : "the token used to encrypt the JWT. Ideally randomized on each restart, but needs to be the same in all instances",
+            "generator" : "secret"
+        },
+        "SFDC_SECRET" : {
+            "description" : "The client token shared with the Canvas definition in Salesforce",
+            "value" : "change me!"
+       }     
+    },
+    "success_url" : "/"
+}

@@ -1,4 +1,6 @@
-Salesforce Canvas and Spring Boot
+# Salesforce Canvas and Spring Boot
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 ### The challenge
 Salesforce canvas offers a capable integration point between Salesforce and external applications to surface them inside the Salesforce UI. One of the aspects is establishing identiy. There are two options: OAuth and a signed request. I'm looking at the later. A signed request posts (as in HTTP POST) a digitally signed JSON request to the external application.
@@ -15,7 +17,14 @@ As added challenge: The application will require standard link and form based na
 - `JWT_SECRET` - the token used to encrypt the JWT. Ideally randomized on each restart, but needs to be the same in a dyno 
 - `SFDC_SECRET` - The client token shared with the Canvas definition in Salesforce
 
+(and a few others - discover for yourself)
 
+### Application endpoints
+
+- `/` The homepage - access unauthenticated
+- `/login` - admin login
+- `/hw` - Hello world page. Throws a 403 if not authenticated
+- `/sfdcauth/[target]` target URL for canvas integration. Post your signed request here. Replace `[target]` with the endpoint you want to reach e.g. `/sfdcauth/hw` to reach `/hw` after authentication
 
 ### Resources
 
@@ -26,3 +35,4 @@ No man is an island, and without [the tubes](https://en.wikipedia.org/wiki/Serie
 - [Spring Boot](https://projects.spring.io/spring-boot/)
 - [Spring Initializr](https://start.spring.io/) - even with the `@EnableWebMvc` causing initial grief
 - [Auth0 on Spring and JWT](https://auth0.com/blog/implementing-jwt-authentication-on-spring-boot/) - the blog post that showed the moving pieces
+- [Stackoverflow](https://stackoverflow.com/users/131021/stwissel) (how do you code?)
