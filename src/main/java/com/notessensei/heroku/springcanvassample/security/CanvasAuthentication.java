@@ -127,6 +127,7 @@ public class CanvasAuthentication implements Authentication {
         final Cookie jwtCookie = new Cookie(SecurityConstants.COOKIE_NAME, token);
         // Limit cookies lifetime
         jwtCookie.setMaxAge(Config.PARAMS.getCookieLifespan());
+        jwtCookie.setPath("/");
         // In production only secure
         if (!Config.PARAMS.runsOnLocalHost(request)) {
             jwtCookie.setSecure(true);

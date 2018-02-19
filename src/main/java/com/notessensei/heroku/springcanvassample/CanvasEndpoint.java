@@ -71,7 +71,7 @@ public class CanvasEndpoint {
                 auth.addJwtToResponse(session, request, response);
                 final HttpHeaders headers = new HttpHeaders();
                 headers.add("Location", redirectTo);
-                return new ResponseEntity<>("Loading...", headers, HttpStatus.FOUND);
+                return new ResponseEntity<>("Loading...", headers, HttpStatus.SEE_OTHER);
             }
 
         } catch (final Exception e) {
