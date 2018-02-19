@@ -65,7 +65,7 @@ public class CanvasEndpoint {
         }
 
         try {
-            final CanvasAuthentication auth = CanvasAuthentication.create(signedRequest);
+            final CanvasAuthentication auth = CanvasAuthentication.create(request, signedRequest);
             if ((auth != null) && auth.isAuthenticated()) {
                 // The canvas request was valid, we add Header and Token
                 auth.addJwtToResponse(session, request, response);

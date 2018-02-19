@@ -39,7 +39,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import canvas.SignedRequest;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -54,13 +53,15 @@ public class CanvasAuthentication implements Authentication {
 
     private static final long serialVersionUID = 1L;
 
-    public static CanvasAuthentication create(final String signedRequest) throws Exception {
+    public static CanvasAuthentication create(final HttpServletRequest request, final String signedRequest)
+            throws Exception {
         if (signedRequest == null) {
             throw new SecurityException("Canvas request is missing");
         }
 
         // Get the request as JsonNode or throw an exception
-        final JsonNode json = SignedRequest.verifyAndDecodeAsJson(signedRequest, Config.PARAMS.getSfdcSecret());
+        final JsonNode json = SignedRequest.verifyAndDecodeAsJson(request, signedRequest,
+                Config.PARAMS.getSfdcSecret());
         final CanvasAuthentication result = new CanvasAuthentication(json);
 
         return result;

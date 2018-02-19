@@ -34,7 +34,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/", "/sfdcauth/**", "/home", "/images/**", "/css/**", "/fonts/**", "/icons/**")
+                .antMatchers("/", "/sfdcauth/**", "/login", "/images/**", "/css/**", "/fonts/**", "/icons/**")
                 .permitAll()
                 .anyRequest().authenticated()
                 .and()

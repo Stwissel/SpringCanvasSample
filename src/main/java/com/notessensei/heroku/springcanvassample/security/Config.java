@@ -24,6 +24,8 @@ package com.notessensei.heroku.springcanvassample.security;
 import java.util.Date;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * Configuration values we read from the environment
  * 
@@ -80,6 +82,23 @@ public enum Config {
 
     public String getSfdcSecret() {
         return this.sfdcSecret;
+    }
+
+    /**
+     * Convenience method for local debugging
+     * allows skipping of signature verification
+     * when running on localhost and environment parameter is set
+     * 
+     * @param request HTTP request to extract server name
+     * @return true if insecure is acceptable
+     */
+    public boolean allowInsecureDebugOperation(HttpServletRequest request) {
+        final String srv = request.getServerName().toLowerCase();
+        if (!"localhost".equals(srv) && !"127.0.0.1".equals(srv) && !"::1".equals(srv)) {
+            String insecure = System.getenv("INSECURE_DEBUG");
+            return  insecure != null && "true".equalsIgnoreCase(insecure); 
+        }
+        return false;
     }
 
 }
