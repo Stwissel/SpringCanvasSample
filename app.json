@@ -1,5 +1,6 @@
 {
-    "name" : "Spring Boot Sample Application for Salesforce CANVAS integration",
+    "name" : "SpringBootSfdcCanvas",
+    "description" : "Sample application in Spring boot for Salesforce Canvas Integration",
     "repository" : "https://github.com/Stwissel/SpringCanvasSample",
     "logo" : "https://spring.io/img/homepage/icon-spring-framework.svg",
     "keywords" : ["spring", "springboot", "salesforce", "canvas"],

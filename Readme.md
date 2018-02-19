@@ -9,4 +9,3 @@ Salesforce canvas offers a capable integration point between Salesforce and exte
 
 - Check the [homepage](https://stwissel.github.io/SpringCanvasSample/) for full details
 - Feel free to [ask and suggest](https://github.com/Stwissel/SpringCanvasSample/issues) or [pull request](https://github.com/Stwissel/SpringCanvasSample/pulls)
--
