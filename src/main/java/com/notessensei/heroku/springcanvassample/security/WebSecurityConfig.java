@@ -32,6 +32,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         http
+                .headers().frameOptions().disable()
+                .and()
                 .authorizeRequests()
                 .antMatchers("/",
                         "/favicon.ico",
@@ -44,7 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/fonts/**",
                         "/icons/**"
                         )
-                .permitAll()
+                .permitAll()                
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(new CanvasAuthorizationFilter(this.authenticationManager()))
