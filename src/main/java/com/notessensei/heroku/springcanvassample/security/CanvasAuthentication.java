@@ -74,6 +74,22 @@ public class CanvasAuthentication implements Authentication {
     }
         return new CanvasAuthentication(userName);
     }
+    
+    public static void addJwtCookie(final HttpServletRequest request, final HttpServletResponse response, final String token) {
+        String encodedToken = new Base64().encodeToString(token.getBytes());
+        // For standard web navigation
+        final Cookie jwtCookie = new Cookie(SecurityConstants.COOKIE_NAME, encodedToken);
+        // Limit cookies lifetime
+        jwtCookie.setMaxAge(Config.PARAMS.getCookieLifespan());
+        jwtCookie.setPath("/");
+        jwtCookie.setVersion(1);
+        // In production only secure
+        if (!Config.PARAMS.runsOnLocalHost(request)) {
+            jwtCookie.setSecure(true);
+        }
+        jwtCookie.setHttpOnly(true);
+        response.addCookie(jwtCookie);
+    }
 
     private final JsonNode                     sfdcRequest;
     private final String                       name;
@@ -124,22 +140,10 @@ public class CanvasAuthentication implements Authentication {
                 .setExpiration(expDate)
                 .signWith(SignatureAlgorithm.HS512, Config.PARAMS.getSecret()).compact();
 
-        String encodedToken = new Base64().encodeToString(token.getBytes());
-        // For standard web navigation
-        final Cookie jwtCookie = new Cookie(SecurityConstants.COOKIE_NAME, encodedToken);
-        // Limit cookies lifetime
-        jwtCookie.setMaxAge(Config.PARAMS.getCookieLifespan());
-        jwtCookie.setPath("/");
-        jwtCookie.setVersion(1);
-        // In production only secure
-        if (!Config.PARAMS.runsOnLocalHost(request)) {
-            jwtCookie.setSecure(true);
-        }
-        jwtCookie.setHttpOnly(true);
-        response.addCookie(jwtCookie);
         // For first call redirection we need to transport the cookie as
-        // attribute
+        // attribute later as cookie
         session.setAttribute(SecurityConstants.COOKIE_ATTRIBUTE, token);
+        CanvasAuthentication.addJwtCookie(request, response, token);
     }
 
     /**
