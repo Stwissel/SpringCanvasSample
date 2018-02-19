@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -123,16 +124,17 @@ public class CanvasAuthentication implements Authentication {
                 .setExpiration(expDate)
                 .signWith(SignatureAlgorithm.HS512, Config.PARAMS.getSecret()).compact();
 
+        String encodedToken = new Base64(true).encodeToString(token.getBytes());
         // For standard web navigation
-        final Cookie jwtCookie = new Cookie(SecurityConstants.COOKIE_NAME, token);
+        final Cookie jwtCookie = new Cookie(SecurityConstants.COOKIE_NAME, encodedToken);
         // Limit cookies lifetime
-        //jwtCookie.setMaxAge(Config.PARAMS.getCookieLifespan());
+        jwtCookie.setMaxAge(Config.PARAMS.getCookieLifespan());
         jwtCookie.setPath("/");
         jwtCookie.setVersion(1);
         // In production only secure
-//        if (!Config.PARAMS.runsOnLocalHost(request)) {
-//            jwtCookie.setSecure(true);
-//        }
+        if (!Config.PARAMS.runsOnLocalHost(request)) {
+            jwtCookie.setSecure(true);
+        }
         jwtCookie.setHttpOnly(true);
         response.addCookie(jwtCookie);
         // For first call redirection we need to transport the cookie as
