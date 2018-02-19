@@ -48,9 +48,9 @@ public enum Config {
         this.secret = (System.getenv("JWT_SECRET") == null)
                 ? UUID.randomUUID().toString() + UUID.randomUUID().toString()
                 : System.getenv("JWT_SECRET");
-        this.sfdcSecret = (System.getenv("SDFC_SECRET") == null)
+        this.sfdcSecret = (System.getenv("SFDC_SECRET") == null)
                 ? UUID.randomUUID().toString() + UUID.randomUUID().toString()
-                : System.getenv("SDFC_SECRET");
+                : System.getenv("SFDC_SECRET");
         final String timeCandidate = System.getenv("EXPIRATION_TIME");
         if (timeCandidate != null) {
             try {

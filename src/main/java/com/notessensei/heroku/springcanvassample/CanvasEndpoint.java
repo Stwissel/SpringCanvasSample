@@ -76,7 +76,7 @@ public class CanvasEndpoint {
 
         } catch (final Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>("signed_request invalid", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("signed_request invalid:"+e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
         // If we got here - it failed!
