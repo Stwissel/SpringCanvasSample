@@ -124,7 +124,7 @@ public class CanvasAuthentication implements Authentication {
                 .setExpiration(expDate)
                 .signWith(SignatureAlgorithm.HS512, Config.PARAMS.getSecret()).compact();
 
-        String encodedToken = new Base64(true).encodeToString(token.getBytes());
+        String encodedToken = new Base64().encodeToString(token.getBytes());
         // For standard web navigation
         final Cookie jwtCookie = new Cookie(SecurityConstants.COOKIE_NAME, encodedToken);
         // Limit cookies lifetime
