@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package canvas;
+package com.notessensei.heroku.springcanvassample.security;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -35,6 +35,7 @@ import java.util.Base64;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,12 +49,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <strike>This utility class has two methods. One verifies and decodes the
  * request as a Java object the other as a JSON String.</strike>
  *
- * Slightly modified: only one method and it returns a JsonNode
+ * Slightly modified: only one method and it returns a JsonNode and a bypass for
+ * debug purposed has been added when running on localhost
  *
  */
 public class SignedRequest {
 
-    public static JsonNode verifyAndDecodeAsJson(final String input, final String secret) throws SecurityException {
+    public static JsonNode verifyAndDecodeAsJson(final HttpServletRequest request, final String input,
+            final String secret) throws SecurityException {
 
         final String[] split = SignedRequest.getParts(input);
 
@@ -74,6 +77,12 @@ public class SignedRequest {
             throw new SecurityException("Error: algorithm missing from payload");
         }
         final String algorithm = algorithmCandidate.textValue();
+
+        // for local debugging the signature verification
+        // can be switched off - do not EVER use that in production
+        if (Config.PARAMS.allowInsecureDebugOperation(request)) {
+            return json;
+        }
 
         // Here the check runs - throws an error if it fails
         SignedRequest.verify(secret, algorithm, encodedEnvelope, encodedSig);
