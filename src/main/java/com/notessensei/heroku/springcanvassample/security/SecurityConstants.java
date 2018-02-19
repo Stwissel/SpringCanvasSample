@@ -22,8 +22,9 @@
 package com.notessensei.heroku.springcanvassample.security;
 
 public final class SecurityConstants {
-    public static final String COOKIE_NAME      = "JSESSIONID"; //"SFDC";
+    public static final String COOKIE_NAME      = "JWT";
     public static final String COOKIE_ATTRIBUTE = "com.salesforce.canvas";
     public static final String USER_NAME_CLAIM  = "SFDCUserName";
     public static final String ROLE_PREFIX      = "ROLE_";
+    public static final String TOKEN_NAME       = "jwt";
 }

@@ -132,6 +132,11 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
     private String getJwtCookie(final HttpServletRequest request) {
         String result = null;
         String resultCandidate = null;
+        
+        resultCandidate = request.getParameter(SecurityConstants.TOKEN_NAME);
+        if (resultCandidate != null) {
+            return resultCandidate;
+        }
 
         // First we look in the session
         Object o = null; // request.getSession().getAttribute(SecurityConstants.COOKIE_ATTRIBUTE);

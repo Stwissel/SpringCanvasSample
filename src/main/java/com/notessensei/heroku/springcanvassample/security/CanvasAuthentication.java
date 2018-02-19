@@ -131,7 +131,7 @@ public class CanvasAuthentication implements Authentication {
      * @param response
      *            the Response to be sent back
      */
-    public void addJwtToResponse(/*final HttpSession session, */final HttpServletRequest request,
+    public String addJwtToResponse(/*final HttpSession session, */final HttpServletRequest request,
             final HttpServletResponse response) {
         final Claims claims = Jwts.claims();
         this.getAuthorities().forEach(auth -> {
@@ -149,6 +149,7 @@ public class CanvasAuthentication implements Authentication {
         // attribute later as cookie
         //session.setAttribute(SecurityConstants.COOKIE_ATTRIBUTE, token);
         CanvasAuthentication.addJwtCookie(request, response, token);
+        return token;
     }
 
     /**

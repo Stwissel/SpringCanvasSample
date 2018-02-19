@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.notessensei.heroku.springcanvassample.security.CanvasAuthentication;
+import com.notessensei.heroku.springcanvassample.security.SecurityConstants;
 
 /**
  * The Spring endpoint that accepts a Canvas Post from Salesforce and returns a
@@ -71,11 +72,11 @@ public class CanvasEndpoint {
             final CanvasAuthentication auth = CanvasAuthentication.create(request, signedRequest);
             if ((auth != null) && auth.isAuthenticated()) {
                 // The canvas request was valid, we add Header and Token
-                auth.addJwtToResponse(/*session, */request, response);
+                String token = auth.addJwtToResponse(/*session, */request, response);
                 final HttpHeaders headers = new HttpHeaders();
                 model.addAttribute("Location", redirectTo);
                 //headers.add("Location", redirectTo);
-                return new ResponseEntity<String>(this.getHTML(redirectTo), headers, HttpStatus.OK);
+                return new ResponseEntity<String>(this.getHTML(redirectTo, token), headers, HttpStatus.OK);
             }
 
         } catch (final Exception e) {
@@ -88,7 +89,7 @@ public class CanvasEndpoint {
 
     }
 
-    private String getHTML(String redirectTo) {
+    private String getHTML(String redirectTo, String token) {
         // TODO Replace with Mustache
         StringBuilder result = new StringBuilder();
        result.append("<!DOCTYPE html>\n");
@@ -96,7 +97,7 @@ public class CanvasEndpoint {
        result.append("<head>\n");
        result.append("<title>Spring and Canvas</title>\n");
        result.append("<body>\n");
-       result.append("<a href=\""+redirectTo+"\">"+redirectTo+"</a>\n");
+       result.append("<a href=\""+redirectTo+"?"+SecurityConstants.TOKEN_NAME+"="+token+"\">"+redirectTo+"</a>\n");
        result.append("<script type=\"text/javaScript\">\n");
        result.append("alert(\""+redirectTo+"\");\n");
        result.append("</script>\n");
