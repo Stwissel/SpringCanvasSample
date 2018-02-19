@@ -1,39 +1,89 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-    xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
-    <head>
-        <title>Spring and Canvas </title>
-        <meta httpequiv="x-ua-compatible" content="ie=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="stylesheet" type="text/css" href="/css/salesforce-lightning-design-system.min.css"/>
-    </head>
-    <body>
-        
-        <div class="slds-grid slds-wrap">
-            <nav class="slds-col slds-size--1-of-1">
-                Page Header Component
-            </nav>
-            <main class="slds-col slds-size--1-of-2">
-                Image
-            </main>
-            <aside class="slds-col slds-size--1-of-2">
-                Tab Component
-            </aside>
-            <nav class="slds-col slds-size--1-of-1">
-                Card Component
-            </nav>
-        </div>
-        
-        <div th:if="${param.error}">
-            Sorry Pal, not you, not here
-        </div>
-        <div th:if="${param.logout}">
-            Bye bye!
-        </div>
-        <form th:action="@{/login}" method="post">
-            <div><label> User Name : <input type="text" name="username"/> </label></div>
-            <div><label> Password: <input type="password" name="password"/> </label></div>
-            <div><input type="submit" value="Sign In"/></div>
-        </form>
-    </body>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+	xmlns:xlink="http://www.w3.org/1999/xlink">
+<head>
+<title>Spring and Canvas</title>
+<meta httpequiv="x-ua-compatible" content="ie=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" type="text/css"
+	href="/css/salesforce-lightning-design-system.min.css" />
+</head>
+<body>
+
+	<div th:if="${param.logout}" class="slds-notify  slds-notify_alert  slds-theme_warning"><span class="slds-icon_container slds-m-right_x-small"><svg class="slds-icon slds-icon_x-small"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="assets/@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg#change_owner"></use></svg></span>
+    <h2
+        class="">Bye Bye</h2>
+</div>
+	<div th:if="${param.error}" class="slds-notify  slds-notify_alert  slds-theme_error">
+		<span class="slds-icon_container slds-m-right_x-small"><svg
+				class="slds-icon slds-icon_x-small">
+				<use xmlns:xlink="http://www.w3.org/1999/xlink"
+					xlink:href="assets/@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg#change_owner"></use></svg></span>
+		<h2>Sorry pal, not you!</h2>
+	</div>
+	<div
+		class="slds-card slds-m-around_medium slds-m-top_medium slds-m-right_medium slds-m-bottom_medium slds-m-left_medium slds-p-around_medium slds-p-top_medium slds-p-right_medium slds-p-bottom_medium slds-p-left_medium slds-card_boundary">
+		<div class="slds-card__header slds-grid">
+			<header class="slds-media slds-media_center slds-has-flexi-truncate">
+				<div class="slds-media__figure">
+					<span class="slds-icon_container slds-icon-action-announcement"><svg
+							class="slds-icon">
+							<use xmlns:xlink="http://www.w3.org/1999/xlink"
+								xlink:href="assets/@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg#announcement"></use></svg></span>
+				</div>
+				<div class="slds-media__body">
+					<h2>
+						<a class="slds-card__header-link slds-truncate"
+							href="javascript:void(0);"><span
+							class="slds-text-heading_small">Administrator login</span></a>
+					</h2>
+				</div>
+			</header>
+			<div class="slds-no-flex"></div>
+		</div>
+		<div class="slds-card__body slds-card__body_inner">
+
+			<div class="slds-card">
+				<div class="slds-card__header slds-grid">
+					<header
+						class="slds-media slds-media_center slds-has-flexi-truncate">
+						<div class="slds-media__body">
+							<h2>
+								<a class="slds-card__header-link slds-truncate"
+									href="javascript:void(0);"><span
+									class="slds-text-heading_small">Form Name</span></a>
+							</h2>
+						</div>
+					</header>
+					<div class="slds-no-flex"></div>
+				</div>
+				<div class="slds-card__body slds-card__body_inner">
+					<form th:action="@{/login}" method="post">
+
+                        <div class="slds-form_stacked">
+
+                            <div class="slds-form-element ">
+                                <label class="slds-form-element__label">User Name</label>
+                                <div class="slds-form-element__control">
+                                    <input class="slds-input" type="text" name="username" />
+                                </div>
+                            </div>
+
+                            <div class="slds-form-element ">
+                                <label class="slds-form-element__label">Password</label>
+                                <div class="slds-form-element__control">
+                                    <input class="slds-input" type="text" name="password" />
+                                </div>
+                            </div>
+                        </div>
+                        <input type="submit" class="slds-button slds-m-top_small slds-button_brand" value="login" />
+                    </form>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</body>
 </html>
