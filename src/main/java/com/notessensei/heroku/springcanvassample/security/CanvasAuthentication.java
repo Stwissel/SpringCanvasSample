@@ -89,6 +89,11 @@ public class CanvasAuthentication implements Authentication {
         }
         jwtCookie.setHttpOnly(true);
         response.addCookie(jwtCookie);
+        Cookie bla = new Cookie("Bla","blaaaah");
+        bla.setHttpOnly(true);
+        bla.setSecure(true);
+        bla.setPath("/");
+        response.addCookie(bla);
     }
 
     private final JsonNode                     sfdcRequest;
