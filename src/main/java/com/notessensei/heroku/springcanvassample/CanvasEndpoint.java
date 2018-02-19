@@ -74,7 +74,7 @@ public class CanvasEndpoint {
                 final HttpHeaders headers = new HttpHeaders();
                 model.addAttribute("Location", redirectTo);
                 //headers.add("Location", redirectTo);
-                return new ResponseEntity<>("redirect", headers, HttpStatus.OK);
+                return new ResponseEntity<String>(this.getHTML(redirectTo), headers, HttpStatus.OK);
             }
 
         } catch (final Exception e) {
@@ -85,5 +85,23 @@ public class CanvasEndpoint {
         // If we got here - it failed!
         return new ResponseEntity<>("Authorization failed", HttpStatus.UNAUTHORIZED);
 
+    }
+
+    private String getHTML(String redirectTo) {
+        // TODO Replace with Mustache
+        StringBuilder result = new StringBuilder();
+       result.append("<!DOCTYPE html>\n");
+       result.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
+       result.append("<head>\n");
+       result.append("<title>Spring and Canvas</title>\n");
+       result.append("<body>\n");
+       result.append("<a href=\""+redirectTo+"\">{{Location}}</a>\n");
+       result.append("<script type=\"text/javaScript\">\n");
+       result.append("alert(\""+redirectTo+"\");\n");
+       result.append("window.location.url='"+redirectTo+"';");
+       result.append("</script>\n");
+       result.append("</body>\n");
+       result.append("</html>");
+        return result.toString();
     }
 }
