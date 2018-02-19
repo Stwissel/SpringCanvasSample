@@ -130,9 +130,9 @@ public class CanvasAuthentication implements Authentication {
         jwtCookie.setPath("/");
         jwtCookie.setVersion(1);
         // In production only secure
-        if (!Config.PARAMS.runsOnLocalHost(request)) {
-            jwtCookie.setSecure(true);
-        }
+//        if (!Config.PARAMS.runsOnLocalHost(request)) {
+//            jwtCookie.setSecure(true);
+//        }
         jwtCookie.setHttpOnly(true);
         response.addCookie(jwtCookie);
         // For first call redirection we need to transport the cookie as
