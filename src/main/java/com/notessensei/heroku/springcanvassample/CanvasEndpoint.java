@@ -29,6 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -46,14 +47,15 @@ import com.notessensei.heroku.springcanvassample.security.CanvasAuthentication;
 public class CanvasEndpoint {
 
     @RequestMapping(value = "/sfdcauth", method = RequestMethod.POST)
-    public ResponseEntity<String> canvasDefaultPost(final String endPoint, final HttpSession session,
+    public ResponseEntity<String> canvasDefaultPost(final String endPoint, final Model model, final HttpSession session,
             final HttpServletRequest request,
             final HttpServletResponse response) {
-        return this.canvasPost(null, session, request, response);
+        return this.canvasPost(null, model, session, request, response);
     }
 
     @RequestMapping(value = "/sfdcauth/{endpoint}", method = RequestMethod.POST)
     public ResponseEntity<String> canvasPost(@PathVariable(name = "endpoint", required = false) final String endPoint,
+            final Model model,
             final HttpSession session, final HttpServletRequest request,
             final HttpServletResponse response) {
 
@@ -70,8 +72,9 @@ public class CanvasEndpoint {
                 // The canvas request was valid, we add Header and Token
                 auth.addJwtToResponse(session, request, response);
                 final HttpHeaders headers = new HttpHeaders();
-                headers.add("Location", redirectTo);
-                return new ResponseEntity<>("Loading...", headers, HttpStatus.SEE_OTHER);
+                model.addAttribute("Location", redirectTo);
+                //headers.add("Location", redirectTo);
+                return new ResponseEntity<>("redirect", headers, HttpStatus.OK);
             }
 
         } catch (final Exception e) {
