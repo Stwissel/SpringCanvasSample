@@ -24,10 +24,10 @@ package com.notessensei.heroku.springcanvassample;
 import java.security.Principal;
 import java.util.UUID;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  *
@@ -36,13 +36,14 @@ import org.springframework.web.bind.annotation.RestController;
  * @author swissel
  *
  */
-@RestController
+@Controller
 public class HelloWorld {
 
     @RequestMapping(value = "/hw", method = RequestMethod.GET)
     public String index(Model model, Principal principal) {
         model.addAttribute("id", UUID.randomUUID().toString());
         model.addAttribute("username", principal.getName());
-        return "Hello World";
+        // return the Thymeleaf template to use
+        return "helloworld";
     }
 }

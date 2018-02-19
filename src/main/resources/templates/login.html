@@ -11,18 +11,21 @@
 	href="/css/salesforce-lightning-design-system.min.css" />
 </head>
 <body>
-
-	<div th:if="${param.logout}" class="slds-notify  slds-notify_alert  slds-theme_warning"><span class="slds-icon_container slds-m-right_x-small"><svg class="slds-icon slds-icon_x-small"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="assets/@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg#change_owner"></use></svg></span>
+{{#param.logout}}
+	<div class="slds-notify  slds-notify_alert  slds-theme_warning"><span class="slds-icon_container slds-m-right_x-small"><svg class="slds-icon slds-icon_x-small"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="assets/@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg#change_owner"></use></svg></span>
     <h2
         class="">Bye Bye</h2>
 </div>
-	<div th:if="${param.error}" class="slds-notify  slds-notify_alert  slds-theme_error">
+{{/param.logout}}
+{{#param.error}}
+	<div class="slds-notify  slds-notify_alert  slds-theme_error">
 		<span class="slds-icon_container slds-m-right_x-small"><svg
 				class="slds-icon slds-icon_x-small">
 				<use xmlns:xlink="http://www.w3.org/1999/xlink"
-					xlink:href="assets/@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg#change_owner"></use></svg></span>
+					xlink:href="/icons/action-sprite/svg/symbols.svg#change_owner"></use></svg></span>
 		<h2>Sorry pal, not you!</h2>
 	</div>
+{{/param.error}}
 	<div
 		class="slds-card slds-m-around_medium slds-m-top_medium slds-m-right_medium slds-m-bottom_medium slds-m-left_medium slds-p-around_medium slds-p-top_medium slds-p-right_medium slds-p-bottom_medium slds-p-left_medium slds-card_boundary">
 		<div class="slds-card__header slds-grid">
@@ -31,7 +34,7 @@
 					<span class="slds-icon_container slds-icon-action-announcement"><svg
 							class="slds-icon">
 							<use xmlns:xlink="http://www.w3.org/1999/xlink"
-								xlink:href="assets/@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg#announcement"></use></svg></span>
+								xlink:href="/icons/action-sprite/svg/symbols.svg#announcement"></use></svg></span>
 				</div>
 				<div class="slds-media__body">
 					<h2>
@@ -53,14 +56,14 @@
 							<h2>
 								<a class="slds-card__header-link slds-truncate"
 									href="javascript:void(0);"><span
-									class="slds-text-heading_small">Form Name</span></a>
+									class="slds-text-heading_small">Admin login</span></a>
 							</h2>
 						</div>
 					</header>
 					<div class="slds-no-flex"></div>
 				</div>
 				<div class="slds-card__body slds-card__body_inner">
-					<form th:action="@{/login}" method="post">
+					<form method="post">
 
                         <div class="slds-form_stacked">
 
@@ -74,7 +77,7 @@
                             <div class="slds-form-element ">
                                 <label class="slds-form-element__label">Password</label>
                                 <div class="slds-form-element__control">
-                                    <input class="slds-input" type="text" name="password" />
+                                    <input class="slds-input" type="password" name="password" />
                                 </div>
                             </div>
                         </div>

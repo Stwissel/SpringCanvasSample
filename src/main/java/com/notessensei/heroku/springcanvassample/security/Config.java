@@ -94,7 +94,7 @@ public enum Config {
      */
     public boolean allowInsecureDebugOperation(HttpServletRequest request) {
         final String srv = request.getServerName().toLowerCase();
-        if (!"localhost".equals(srv) && !"127.0.0.1".equals(srv) && !"::1".equals(srv)) {
+        if ("localhost".equals(srv) || "127.0.0.1".equals(srv) || "::1".equals(srv)) {
             String insecure = System.getenv("INSECURE_DEBUG");
             return  insecure != null && "true".equalsIgnoreCase(insecure); 
         }

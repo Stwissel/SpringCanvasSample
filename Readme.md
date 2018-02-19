@@ -34,5 +34,6 @@ No man is an island, and without [the tubes](https://en.wikipedia.org/wiki/Serie
 - [GitHub](https://github.com/stwissel/) - get the sample project there
 - [Spring Boot](https://projects.spring.io/spring-boot/)
 - [Spring Initializr](https://start.spring.io/) - even with the `@EnableWebMvc` causing initial grief
+- [Spring Boot and Mustache](http://www.baeldung.com/spring-boot-mustache) - I'm a big fan of [Mustache](http://mustache.github.io/) since it works everywhere
 - [Auth0 on Spring and JWT](https://auth0.com/blog/implementing-jwt-authentication-on-spring-boot/) - the blog post that showed the moving pieces
 - [Stackoverflow](https://stackoverflow.com/users/131021/stwissel) (how do you code?)
