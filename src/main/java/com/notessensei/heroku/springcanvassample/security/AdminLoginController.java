@@ -51,7 +51,7 @@ public class AdminLoginController {
     }
 
     @PostMapping
-    public ResponseEntity<String> authenticate(@RequestParam Map<String,String> params, HttpSession session ,HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<String> authenticate(@RequestParam Map<String,String> params, /*HttpSession session , */ HttpServletRequest request, HttpServletResponse response) {
 
         CanvasAuthentication result = null;
 
@@ -69,7 +69,7 @@ public class AdminLoginController {
         }
 
         result = CanvasAuthentication.createAdminAccess(userName, password);
-        result.addJwtToResponse(session, request, response);
+        result.addJwtToResponse(/*session,*/ request, response);
         } catch (Exception e) {
 
         }

@@ -84,9 +84,9 @@ public class CanvasAuthentication implements Authentication {
         jwtCookie.setPath("/");
         jwtCookie.setVersion(1);
         // In production only secure
-        //if (!Config.PARAMS.runsOnLocalHost(request)) {
-        //    jwtCookie.setSecure(true);
-        //}
+        if (!Config.PARAMS.runsOnLocalHost(request)) {
+            jwtCookie.setSecure(true);
+        }
         jwtCookie.setHttpOnly(true);
         response.addCookie(jwtCookie);
     }
@@ -126,7 +126,7 @@ public class CanvasAuthentication implements Authentication {
      * @param response
      *            the Response to be sent back
      */
-    public void addJwtToResponse(final HttpSession session, final HttpServletRequest request,
+    public void addJwtToResponse(/*final HttpSession session, */final HttpServletRequest request,
             final HttpServletResponse response) {
         final Claims claims = Jwts.claims();
         this.getAuthorities().forEach(auth -> {
@@ -142,7 +142,7 @@ public class CanvasAuthentication implements Authentication {
 
         // For first call redirection we need to transport the cookie as
         // attribute later as cookie
-        session.setAttribute(SecurityConstants.COOKIE_ATTRIBUTE, token);
+        //session.setAttribute(SecurityConstants.COOKIE_ATTRIBUTE, token);
         CanvasAuthentication.addJwtCookie(request, response, token);
     }
 

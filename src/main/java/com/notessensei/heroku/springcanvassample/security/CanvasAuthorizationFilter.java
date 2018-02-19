@@ -33,7 +33,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -135,7 +134,7 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
         String resultCandidate = null;
 
         // First we look in the session
-        Object o = request.getSession().getAttribute(SecurityConstants.COOKIE_ATTRIBUTE);
+        Object o = null; // request.getSession().getAttribute(SecurityConstants.COOKIE_ATTRIBUTE);
         if (o != null) {
             result = String.valueOf(o);
             System.out.println("Session JWT found");
@@ -152,8 +151,10 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
             }
         }
         if (resultCandidate != null) {
-           // result = new String(new Base64().decode(resultCandidate.getBytes()));
-           result = resultCandidate; 
+           // A JWT token as 2 dots - exactly 2
+           result = (resultCandidate.replaceAll("[.]", "").length()+2 == resultCandidate.length())
+                ?resultCandidate
+                : null; 
         }
 
         return result;

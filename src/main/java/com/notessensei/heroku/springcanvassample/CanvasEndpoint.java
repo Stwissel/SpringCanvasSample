@@ -47,16 +47,17 @@ import com.notessensei.heroku.springcanvassample.security.CanvasAuthentication;
 public class CanvasEndpoint {
 
     @RequestMapping(value = "/sfdcauth", method = RequestMethod.POST)
-    public ResponseEntity<String> canvasDefaultPost(final String endPoint, final Model model, final HttpSession session,
+    public ResponseEntity<String> canvasDefaultPost(final String endPoint, final Model model,
+            /*final HttpSession session,*/
             final HttpServletRequest request,
             final HttpServletResponse response) {
-        return this.canvasPost(null, model, session, request, response);
+        return this.canvasPost(null, model,/* session,*/ request, response);
     }
 
     @RequestMapping(value = "/sfdcauth/{endpoint}", method = RequestMethod.POST)
     public ResponseEntity<String> canvasPost(@PathVariable(name = "endpoint", required = false) final String endPoint,
             final Model model,
-            final HttpSession session, final HttpServletRequest request,
+            /*final HttpSession session,*/ final HttpServletRequest request,
             final HttpServletResponse response) {
 
         final String signedRequest = request.getParameter("signed_request");
@@ -70,7 +71,7 @@ public class CanvasEndpoint {
             final CanvasAuthentication auth = CanvasAuthentication.create(request, signedRequest);
             if ((auth != null) && auth.isAuthenticated()) {
                 // The canvas request was valid, we add Header and Token
-                auth.addJwtToResponse(session, request, response);
+                auth.addJwtToResponse(/*session, */request, response);
                 final HttpHeaders headers = new HttpHeaders();
                 model.addAttribute("Location", redirectTo);
                 //headers.add("Location", redirectTo);
