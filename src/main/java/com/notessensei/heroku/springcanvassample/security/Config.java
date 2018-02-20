@@ -30,7 +30,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
  * Configuration values we read from the environment
- * 
+ *
  * @author swissel
  *
  */
@@ -39,8 +39,8 @@ public enum Config {
     PARAMS;
 
     // Values we get from the environment
-    private final String secret;
-    private final String sfdcSecret;
+    private final String secret;                      // For use with JWT
+    private final String sfdcSecret;                  // From the Canvas setting
     private long         expirationTime = 864000_000; // 10 days
 
     private Config() {
@@ -48,9 +48,9 @@ public enum Config {
         this.secret = (System.getenv("JWT_SECRET") == null)
                 ? UUID.randomUUID().toString() + UUID.randomUUID().toString()
                 : System.getenv("JWT_SECRET");
-        this.sfdcSecret = (System.getenv("SDFC_SECRET") == null)
+        this.sfdcSecret = (System.getenv("SFDC_SECRET") == null)
                 ? UUID.randomUUID().toString() + UUID.randomUUID().toString()
-                : System.getenv("SDFC_SECRET");
+                : System.getenv("SFDC_SECRET");
         final String timeCandidate = System.getenv("EXPIRATION_TIME");
         if (timeCandidate != null) {
             try {
@@ -62,6 +62,41 @@ public enum Config {
             this.expirationTime = 3600_000L; // 1 hour
         }
 
+    }
+
+    /**
+     *
+     * @param userName
+     *            User Name in clear text
+     * @param password
+     *            password encoded with bCrypy
+     * @return true for a match
+     */
+    public boolean adminIsValid(final String userName, final String password) {
+        final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        final String usr = System.getenv("ADMIN_NAME");
+        final String pwd = System.getenv("ADMIN_PASSWORD");
+        return (userName.equals(usr) && encoder.matches(password, pwd));
+    }
+
+    /**
+     * Convenience method for local debugging allows skipping of signature
+     * verification when running on localhost and environment parameter is set
+     *
+     * @param request
+     *            HTTP request to extract server name
+     * @return true if insecure is acceptable
+     */
+    public boolean allowInsecureDebugOperation(final HttpServletRequest request) {
+        if (this.runsOnLocalHost(request)) {
+            final String insecure = System.getenv("INSECURE_DEBUG");
+            return (insecure != null) && "true".equalsIgnoreCase(insecure);
+        }
+        return false;
+    }
+
+    public String getAdminUserName() {
+        return String.valueOf(System.getenv("ADMIN_NAME"));
     }
 
     public int getCookieLifespan() {
@@ -86,42 +121,9 @@ public enum Config {
         return this.sfdcSecret;
     }
 
-    /**
-     * Convenience method for local debugging
-     * allows skipping of signature verification
-     * when running on localhost and environment parameter is set
-     * 
-     * @param request HTTP request to extract server name
-     * @return true if insecure is acceptable
-     */
-    public boolean allowInsecureDebugOperation(HttpServletRequest request) {
-        if (this.runsOnLocalHost(request)) {
-            String insecure = System.getenv("INSECURE_DEBUG");
-            return  insecure != null && "true".equalsIgnoreCase(insecure); 
-        }
-        return false;
-    }
-
-    /**
-     *
-     * @param userName User Name in clear text
-     * @param password password encoded with bCrypy
-     * @return true for a match
-     */
-    public boolean adminIsValid(String userName, String password) {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String usr = System.getenv("ADMIN_NAME");
-        String pwd = System.getenv("ADMIN_PASSWORD");
-        return (userName.equals(usr) && encoder.matches(password, pwd));
-    }
-
-    public boolean runsOnLocalHost(HttpServletRequest request) {
+    public boolean runsOnLocalHost(final HttpServletRequest request) {
         final String srv = request.getServerName().toLowerCase();
         return ("localhost".equals(srv) || "127.0.0.1".equals(srv) || "::1".equals(srv));
-    }
-
-    public String getAdminUserName() {
-        return String.valueOf(System.getenv("ADMIN_NAME"));
     }
 
 }

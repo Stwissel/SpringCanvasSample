@@ -36,15 +36,16 @@ import com.notessensei.heroku.springcanvassample.security.Config;
 
 /**
  *
- * The unavoidable HelloWorld example
- * 
+ * The unavoidable HelloWorld example - Also gives an admin access to the
+ * metrics endpoint
+ *
  * @author swissel
  *
  */
 @Controller
 public class HelloWorld {
 
-    private List<String> adminList = new ArrayList<>(Arrays.asList("/metrics",
+    private final List<String> adminList = new ArrayList<>(Arrays.asList("/metrics",
             "/loggers",
             "/auditevents",
             "/beans",
@@ -56,18 +57,17 @@ public class HelloWorld {
             "/trace",
             "/dump",
             "/info",
-            "/loggers"
-            ));
+            "/loggers"));
 
     @RequestMapping(value = "/hw", method = RequestMethod.GET)
-    public String index(Model model, Principal principal) {
+    public String index(final Model model, final Principal principal) {
         model.addAttribute("id", UUID.randomUUID().toString());
-        String usr = principal.getName();
+        final String usr = principal.getName();
         model.addAttribute("username", usr);
         if (usr.equals(Config.PARAMS.getAdminUserName())) {
-            model.addAttribute("adminList", adminList);
+            model.addAttribute("adminList", this.adminList);
         } else {
-            model.addAttribute("adminList",new ArrayList<>());
+            model.addAttribute("adminList", new ArrayList<>());
         }
         // return the template to use
         return "helloworld";

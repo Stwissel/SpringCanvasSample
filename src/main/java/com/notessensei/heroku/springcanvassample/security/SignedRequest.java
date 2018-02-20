@@ -30,12 +30,13 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.codec.binary.Base64;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,7 +64,8 @@ public class SignedRequest {
         final String encodedSig = split[0];
         final String encodedEnvelope = split[1];
 
-        final String json_envelope = new String(Base64.getMimeDecoder().decode(encodedEnvelope));
+        final String json_envelope = new String(new Base64().decode(encodedEnvelope.getBytes()));
+
         final ObjectMapper mapper = new ObjectMapper();
         JsonNode json = null;
         try {
@@ -107,7 +109,7 @@ public class SignedRequest {
             throws SecurityException {
         if ((secret == null) || (secret.trim().length() == 0)) {
             throw new IllegalArgumentException(
-                    "secret is null, did you set your environment variable CANVAS_CONSUMER_SECRET?");
+                    "secret is null, did you set your environment variable SFDC_SECRET?");
         }
 
         SecretKey hmacKey = null;
@@ -119,7 +121,8 @@ public class SignedRequest {
 
             // Check to see if the body was tampered with
             final byte[] digest = mac.doFinal(encodedEnvelope.getBytes());
-            final byte[] decode_sig = Base64.getMimeDecoder().decode(encodedSig);
+            final byte[] decode_sig = new Base64(true).decode(encodedSig.getBytes());
+
             if (!Arrays.equals(digest, decode_sig)) {
                 final String label = "Warning: Request was tampered with";
                 throw new SecurityException(label);

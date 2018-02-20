@@ -37,16 +37,27 @@ public class SpringCanvasSampleApplication {
         SpringApplication.run(SpringCanvasSampleApplication.class, args);
     }
 
+    /**
+     * Ensure that the template doesn't blow up when invalid parameters are
+     * specified
+     *
+     * @param templateLoader
+     *            template source
+     * @param environment
+     *            runtime environment
+     * @return a Mustache compiler
+     */
     @Bean
-    public Mustache.Compiler mustacheCompiler(Mustache.TemplateLoader templateLoader, Environment environment) {
+    public Mustache.Compiler mustacheCompiler(final Mustache.TemplateLoader templateLoader,
+            final Environment environment) {
 
-        MustacheEnvironmentCollector collector = new MustacheEnvironmentCollector();
+        final MustacheEnvironmentCollector collector = new MustacheEnvironmentCollector();
         collector.setEnvironment(environment);
 
         return Mustache.compiler()
-          .defaultValue("n/a")
-          .withLoader(templateLoader)
-          .withCollector(collector);
+                .defaultValue(":-(")
+                .withLoader(templateLoader)
+                .withCollector(collector);
 
     }
 }

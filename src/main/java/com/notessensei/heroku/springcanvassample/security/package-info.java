@@ -22,7 +22,7 @@
 /**
  * Security related classes: the Authentication and Authorization based filters
  * and helper classes including web security
- * 
+ *
  * @author swissel
  *
  */

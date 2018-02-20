@@ -45,20 +45,28 @@ import com.notessensei.heroku.springcanvassample.security.CanvasAuthentication;
 @Controller
 public class CanvasEndpoint {
 
-    @RequestMapping(value = "/sfdcauth", method = RequestMethod.POST)
-    public ResponseEntity<String> canvasDefaultPost(final String endPoint, final HttpSession session,
-            final HttpServletRequest request,
-            final HttpServletResponse response) {
-        return this.canvasPost(null, session, request, response);
-    }
-
+    /**
+     * Authentication to the application by a Canvas post with redirection to
+     * the endpoint that actually provides the data requested
+     *
+     * @param endPoint
+     *            - the endpoint to reach. Needs to be defined elsewhere to be
+     *            valid (see HelloWorld for /hw)
+     * @param session
+     *            - HttpSession
+     * @param request
+     *            - HttpRequest
+     * @param response
+     *            - HttpResponse
+     * @return - A response entity with a 303 or 400 status
+     */
     @RequestMapping(value = "/sfdcauth/{endpoint}", method = RequestMethod.POST)
     public ResponseEntity<String> canvasPost(@PathVariable(name = "endpoint", required = false) final String endPoint,
             final HttpSession session, final HttpServletRequest request,
             final HttpServletResponse response) {
 
         final String signedRequest = request.getParameter("signed_request");
-        final String redirectTo = (endPoint == null) ? "/" : "/" + endPoint;
+        final String redirectTo = ((endPoint == null) || "".equals(endPoint)) ? "/" : "/" + endPoint;
 
         if (signedRequest == null) {
             return new ResponseEntity<>("signed_request missing", HttpStatus.BAD_REQUEST);
@@ -68,19 +76,23 @@ public class CanvasEndpoint {
             final CanvasAuthentication auth = CanvasAuthentication.create(request, signedRequest);
             if ((auth != null) && auth.isAuthenticated()) {
                 // The canvas request was valid, we add Header and Token
-                auth.addJwtToResponse(session, request, response);
+                final String token = auth.getJwtToken();
+                CanvasAuthentication.addJwtCookie(session, request, response, token);
+
+                // Prepare the header for the redirect to actual payload
                 final HttpHeaders headers = new HttpHeaders();
                 headers.add("Location", redirectTo);
-                return new ResponseEntity<>("Loading...", headers, HttpStatus.FOUND);
+                return new ResponseEntity<String>(redirectTo, headers, HttpStatus.SEE_OTHER);
             }
 
         } catch (final Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>("signed_request invalid", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("signed_request invalid:" + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
         // If we got here - it failed!
         return new ResponseEntity<>("Authorization failed", HttpStatus.UNAUTHORIZED);
 
     }
+
 }

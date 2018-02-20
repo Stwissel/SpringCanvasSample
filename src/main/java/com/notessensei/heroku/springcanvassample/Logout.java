@@ -21,24 +21,57 @@
  */
 package com.notessensei.heroku.springcanvassample;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.Enumeration;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- * Allows to generate a bcryped password for the admin account to be used as
- * environmental variable in Heroku config
+ *
+ * The unavoidable HelloWorld example - Also gives an admin access to the
+ * metrics endpoint
  *
  * @author swissel
  *
  */
-@RestController
-public class PasswordGenerator {
+@Controller
+public class Logout {
 
-    @GetMapping(path = "/password")
-    public String getAPassword(@RequestParam(name = "password") final String password) {
-        final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        return encoder.encode(password);
+    @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    public String index(final HttpSession session, final HttpServletRequest request, final HttpServletResponse response) {
+
+        // Clear the context
+        SecurityContextHolder.getContext().setAuthentication(null);
+        SecurityContextHolder.clearContext();
+
+        // Clear cookies
+        this.killCookies(request, response);
+
+        // Clear the attributes
+        final Enumeration<String> e = session.getAttributeNames();
+        while (e.hasMoreElements()) {
+            final String attr = e.nextElement();
+            session.setAttribute(attr, null);
+        }
+        session.invalidate();
+
+        return "logout";
+    }
+
+    private void killCookies(final HttpServletRequest request, final HttpServletResponse response) {
+        final Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (int i = 0; i < cookies.length; i++) {
+                cookies[i].setMaxAge(0);
+                response.addCookie(cookies[i]);
+            }
+        }
     }
 }
