@@ -90,7 +90,7 @@ public class CanvasAuthentication implements Authentication {
         jwtCookie.setHttpOnly(true);
         response.addCookie(jwtCookie);
         Cookie bla = new Cookie("Bla","blaaaah");
-        bla.setHttpOnly(true);
+        //bla.setHttpOnly(true);
         bla.setSecure(true);
         bla.setPath("/");
         bla.setDomain("springboot-canvas.herokuapp.com");
