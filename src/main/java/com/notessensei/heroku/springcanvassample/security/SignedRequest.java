@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -64,7 +65,7 @@ public class SignedRequest {
         final String encodedEnvelope = split[1];
 
         final String json_envelope = new String(new Base64().decode(encodedEnvelope.getBytes()));
-        
+
         final ObjectMapper mapper = new ObjectMapper();
         JsonNode json = null;
         try {
@@ -121,7 +122,7 @@ public class SignedRequest {
             // Check to see if the body was tampered with
             final byte[] digest = mac.doFinal(encodedEnvelope.getBytes());
             final byte[] decode_sig = new Base64(true).decode(encodedSig.getBytes());
-            
+
             if (!Arrays.equals(digest, decode_sig)) {
                 final String label = "Warning: Request was tampered with";
                 throw new SecurityException(label);

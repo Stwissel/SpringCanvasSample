@@ -31,7 +31,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -45,7 +44,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 /**
- * Implements
+ * Authentication module that can translate a Canvas signed_request into a
+ * Spring Authentication object including setting of a JWT Token
  *
  * @author swissel
  *
@@ -54,9 +54,45 @@ public class CanvasAuthentication implements Authentication {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Adds a JWT Token to Session and as Cookie
+     *
+     * @param session
+     *            HTTP Session
+     * @param request
+     *            HTTP Request
+     * @param response
+     *            HTTP Response
+     * @param token
+     *            the JWT information
+     */
+    public static void addJwtCookie(final HttpSession session, final HttpServletRequest request,
+            final HttpServletResponse response, final String token) {
+
+        if ((token == null) || "".equals(token)) {
+            return;
+        }
+
+        final Cookie jwtCookie = new Cookie(SecurityConstants.COOKIE_NAME, token);
+        // Limit cookies lifetime
+        jwtCookie.setMaxAge(Config.PARAMS.getCookieLifespan());
+        jwtCookie.setPath("/");
+        jwtCookie.setVersion(1);
+        // In production only secure
+        if (!Config.PARAMS.runsOnLocalHost(request)) {
+            jwtCookie.setSecure(true);
+        }
+        // Ensure nobody tampers with the cookie using JavaScript
+        jwtCookie.setHttpOnly(true);
+        response.addCookie(jwtCookie);
+        // Capture in the session for faster access
+        session.setAttribute(SecurityConstants.COOKIE_ATTRIBUTE, token);
+
+    }
+
     public static CanvasAuthentication create(final HttpServletRequest request, final String signedRequest)
             throws Exception {
-        if (signedRequest == null) {
+        if ((signedRequest == null) || "".equals(signedRequest)) {
             throw new SecurityException("Canvas request is missing");
         }
 
@@ -69,26 +105,10 @@ public class CanvasAuthentication implements Authentication {
     }
 
     public static CanvasAuthentication createAdminAccess(final String userName, final String password) {
-        if (!Config.PARAMS.adminIsValid(userName,password) ) {
-        throw new SecurityException("Username or password missing");
-    }
+        if (!Config.PARAMS.adminIsValid(userName, password)) {
+            throw new SecurityException("Username or password missing");
+        }
         return new CanvasAuthentication(userName);
-    }
-    
-    public static void addJwtCookie(final HttpServletRequest request, final HttpServletResponse response, final String token) {
-        //String encodedToken = new Base64().encodeToString(token.getBytes());
-        // For standard web navigation
-        final Cookie jwtCookie = new Cookie(SecurityConstants.COOKIE_NAME, token);
-        // Limit cookies lifetime
-        //jwtCookie.setMaxAge(Config.PARAMS.getCookieLifespan());
-        jwtCookie.setPath("/");
-        jwtCookie.setVersion(1);
-        // In production only secure
-        //if (!Config.PARAMS.runsOnLocalHost(request)) {
-        //    jwtCookie.setSecure(true);
-        //}
-        jwtCookie.setHttpOnly(true);
-        response.addCookie(jwtCookie);
     }
 
     private final JsonNode                     sfdcRequest;
@@ -121,32 +141,6 @@ public class CanvasAuthentication implements Authentication {
     }
 
     /**
-     * Adds a JWT Header and cookie to the servlet response
-     *
-     * @param response
-     *            the Response to be sent back
-     */
-    public void addJwtToResponse(final HttpSession session, final HttpServletRequest request,
-            final HttpServletResponse response) {
-        final Claims claims = Jwts.claims();
-        this.getAuthorities().forEach(auth -> {
-            claims.put(SecurityConstants.ROLE_PREFIX + auth.getAuthority(), auth.getAuthority());
-        });
-        // Finally capture user name
-        claims.put(SecurityConstants.USER_NAME_CLAIM, this.getPrincipal().getUsername());
-        final Date expDate = Config.PARAMS.getExpirationTime();
-        final String token = Jwts.builder()
-                .setClaims(claims)
-                .setExpiration(expDate)
-                .signWith(SignatureAlgorithm.HS512, Config.PARAMS.getSecret()).compact();
-
-        // For first call redirection we need to transport the cookie as
-        // attribute later as cookie
-        session.setAttribute(SecurityConstants.COOKIE_ATTRIBUTE, token);
-        CanvasAuthentication.addJwtCookie(request, response, token);
-    }
-
-    /**
      * @see org.springframework.security.core.Authentication#getAuthorities()
      */
     @Override
@@ -176,6 +170,33 @@ public class CanvasAuthentication implements Authentication {
             json = String.valueOf(this.sfdcRequest);
         }
         return json;
+    }
+
+    /**
+     * Adds a JWT Header and cookie to the servlet response
+     *
+     * @param response
+     *            the Response to be sent back
+     */
+    public String getJwtToken() {
+        final Claims claims = Jwts.claims();
+        // Capture roles
+        this.getAuthorities().forEach(auth -> {
+            claims.put(SecurityConstants.ROLE_PREFIX + auth.getAuthority(), auth.getAuthority());
+        });
+        // Finally capture user name
+        claims.put(SecurityConstants.USER_NAME_CLAIM, this.getPrincipal().getUsername());
+
+        // Insert here: other claims
+
+        // Build Token
+        final Date expDate = Config.PARAMS.getExpirationTime();
+        final String token = Jwts.builder()
+                .setClaims(claims)
+                .setExpiration(expDate)
+                .signWith(SignatureAlgorithm.HS512, Config.PARAMS.getSecret()).compact();
+
+        return token;
     }
 
     /**

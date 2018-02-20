@@ -24,6 +24,8 @@ package com.notessensei.heroku.springcanvassample.security;
 import org.springframework.security.core.GrantedAuthority;
 
 /**
+ * Authority utility class to be used with CanvasAuthentication
+ * 
  * @author swissel
  *
  */

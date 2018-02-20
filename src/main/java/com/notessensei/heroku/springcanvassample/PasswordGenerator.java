@@ -27,15 +27,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * Allows to generate a bcryped password for the admin account to be used as
+ * environmental variable in Heroku config
+ *
  * @author swissel
  *
  */
 @RestController
 public class PasswordGenerator {
 
-    @GetMapping(path="/password")
-    public String getAPassword(@RequestParam(name="password") final String password) {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    @GetMapping(path = "/password")
+    public String getAPassword(@RequestParam(name = "password") final String password) {
+        final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         return encoder.encode(password);
     }
 }

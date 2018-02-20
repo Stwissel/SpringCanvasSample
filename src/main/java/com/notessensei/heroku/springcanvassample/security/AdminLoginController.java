@@ -38,6 +38,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
+ * Helper class to allow Administrator access outside of the Canvas embedded
+ * application, comes with Actuator priviledges
+ *
  * @author swissel
  *
  */
@@ -45,41 +48,44 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/login")
 public class AdminLoginController {
 
-    @GetMapping
-    public String loginForm() {
-        return "login";
-    }
-
     @PostMapping
-    public ResponseEntity<String> authenticate(@RequestParam Map<String,String> params, HttpSession session ,HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<String> authenticate(@RequestParam final Map<String, String> params,
+            final HttpSession session,
+            final HttpServletRequest request, final HttpServletResponse response) {
 
         CanvasAuthentication result = null;
 
         try {
 
-        String userName = params.get("username");
-        String password = params.get("password");
+            final String userName = params.get("username");
+            final String password = params.get("password");
 
-        if (userName == null || password == null) {
-            throw new SecurityException("Username or password missing");
-        }
+            if ((userName == null) || (password == null) || "".equals(userName) || "".equals(password)) {
+                throw new SecurityException("Username or password missing");
+            }
 
-        if (!Config.PARAMS.adminIsValid(userName,password) ) {
-            throw new SecurityException("Username or password missing");
-        }
+            if (!Config.PARAMS.adminIsValid(userName, password)) {
+                throw new SecurityException("Username or password invalid");
+            }
 
-        result = CanvasAuthentication.createAdminAccess(userName, password);
-        result.addJwtToResponse(session, request, response);
-        } catch (Exception e) {
+            result = CanvasAuthentication.createAdminAccess(userName, password);
+            final String token = result.getJwtToken();
+            CanvasAuthentication.addJwtCookie(session, request, response, token);
+        } catch (final Exception e) {
 
         }
         if (result != null) {
-         SecurityContextHolder.getContext().setAuthentication(result);
-         final HttpHeaders headers = new HttpHeaders();
-         headers.add("Location", "/hw");
-         return new ResponseEntity<>("Loading...", headers, HttpStatus.FOUND);
+            SecurityContextHolder.getContext().setAuthentication(result);
+            final HttpHeaders headers = new HttpHeaders();
+            headers.add("Location", "/hw");
+            return new ResponseEntity<>("Loading...", headers, HttpStatus.FOUND);
         }
-        return new ResponseEntity<>("/login", HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>("/login", HttpStatus.FORBIDDEN);
+    }
+
+    @GetMapping
+    public String loginForm() {
+        return "login";
     }
 
 }

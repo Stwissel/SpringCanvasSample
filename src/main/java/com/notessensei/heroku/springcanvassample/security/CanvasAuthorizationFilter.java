@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -33,7 +35,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -42,13 +43,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 
 /**
+ * Authorization filter that captures a JWT Token from session or Cookie and
+ * authenticates the user based on that token
+ *
  * @author swissel
  *
  */
 public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
+
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
 
     public CanvasAuthorizationFilter(final AuthenticationManager authenticationManager) {
         super(authenticationManager);
@@ -63,15 +70,14 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
             final FilterChain chain)
             throws IOException, ServletException {
 
-        final String jwtCookie = this.getJwtCookie(request);
+        final String jwtPayload = this.getJwtPayload(request);
 
         // Check if we have a JWT we can process
-        if ((jwtCookie != null) && !"null".equals(jwtCookie)) {
-            final Authentication authentication = this.extractAuthentication(jwtCookie);
+        if ((jwtPayload != null) && !"null".equals(jwtPayload)) {
+            final Authentication authentication = this.extractAuthentication(jwtPayload);
             if (authentication != null) {
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            // Put the cookie back
-            CanvasAuthentication.addJwtCookie(request, response, jwtCookie);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                // TODO: Should we renew the token?
             }
         }
 
@@ -85,10 +91,10 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
      *            header might be null
      * @param jwtCookie
      *            might be null, but not both
-     * @return an Authentication Toke
+     * @return an Authentication object
      */
     private Authentication extractAuthentication(final String jwtCookie) {
-        // Cookie is prefered to header
+
         Authentication result = null;
         String user = null;
         final Collection<GrantedAuthority> roles = new ArrayList<>();
@@ -115,9 +121,10 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
             if (user != null) {
                 result = new UsernamePasswordAuthenticationToken(user, UUID.randomUUID().toString(), roles);
             }
-
+        } catch (final ExpiredJwtException expired) {
+            this.logger.log(Level.INFO, "JWT expired", expired);
         } catch (final Exception e) {
-            e.printStackTrace();
+            this.logger.log(Level.SEVERE, e.getMessage(), e);
             result = null;
         }
         return result;
@@ -130,32 +137,26 @@ public class CanvasAuthorizationFilter extends BasicAuthenticationFilter {
      *            HTTP Request
      * @return a cookie or null
      */
-    private String getJwtCookie(final HttpServletRequest request) {
+    private String getJwtPayload(final HttpServletRequest request) {
         String result = null;
-        String resultCandidate = null;
 
         // First we look in the session
-        Object o = request.getSession().getAttribute(SecurityConstants.COOKIE_ATTRIBUTE);
-        if (o != null) {
+        final Object o = request.getSession().getAttribute(SecurityConstants.COOKIE_ATTRIBUTE);
+        if ((o != null) && !"".equals(o)) {
             result = String.valueOf(o);
-            System.out.println("Session JWT found");
         } else {
+            // Then in the cookies
             final Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (int i = 0; i < cookies.length; i++) {
                     final Cookie currentCookie = cookies[i];
                     if (currentCookie.getName().equals(SecurityConstants.COOKIE_NAME)) {
-                        resultCandidate = currentCookie.getValue();
+                        result = currentCookie.getValue();
                         break;
                     }
                 }
             }
         }
-        if (resultCandidate != null) {
-           // result = new String(new Base64().decode(resultCandidate.getBytes()));
-           result = resultCandidate; 
-        }
-
         return result;
     }
 }
