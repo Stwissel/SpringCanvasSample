@@ -34,7 +34,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception {
         http
         .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 .and()
                 .headers().frameOptions().disable()
                 .and()
