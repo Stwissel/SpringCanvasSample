@@ -23,6 +23,7 @@ package com.notessensei.heroku.springcanvassample.security;
 
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -46,7 +47,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class AdminLoginController {
 
     @GetMapping
-    public String loginForm() {
+    public String loginForm(final HttpServletResponse response) {
+        Cookie bla = new Cookie("Bla","blaaaah");
+        bla.setHttpOnly(true);
+        bla.setSecure(true);
+        bla.setPath("/");
+        response.addCookie(bla);
         return "login";
     }
 
