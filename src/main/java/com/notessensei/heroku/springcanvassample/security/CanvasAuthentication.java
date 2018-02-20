@@ -93,6 +93,7 @@ public class CanvasAuthentication implements Authentication {
         bla.setHttpOnly(true);
         bla.setSecure(true);
         bla.setPath("/");
+        bla.setDomain("springboot-canvas.herokuapp.com");
         response.addCookie(bla);
     }
 
