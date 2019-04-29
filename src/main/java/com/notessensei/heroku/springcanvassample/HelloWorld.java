@@ -1,5 +1,5 @@
 /** ========================================================================= *
- * Copyright (C)  2017, 2018 Salesforce Inc ( http://www.salesforce.com/      *
+ * Copyright (C)  2017, 2019 Salesforce Inc ( http://www.salesforce.com/      *
  *                            All rights reserved.                            *
  *                                                                            *
  *  @author     Stephan H. Wissel (stw) <swissel@salesforce.com>              *
